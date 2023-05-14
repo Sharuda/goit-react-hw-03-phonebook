@@ -16,25 +16,33 @@ export class App extends Component {
   };
 
   componentDidMount() {
-    const parsedContacts = localStorage.getItem(CONTACTS_STORAGE_KEY);
-    if (parsedContacts) {
-      this.setState({ contacts: JSON.parse(parsedContacts) });
-    } else {
-      this.setState({
-        contacts: [
-          { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-          { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-          { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-          { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-        ],
-      });
+    try {
+      const parsedContacts = localStorage.getItem(CONTACTS_STORAGE_KEY);
+      if (parsedContacts) {
+        this.setState({ contacts: JSON.parse(parsedContacts) });
+      } else {
+        this.setState({
+          contacts: [
+            { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
+            { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
+            { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
+            { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
+          ],
+        });
+      }
+    } catch (error) {
+      console.error(error.message);
     }
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(_, prevState) {
     if (prevState.contacts !== this.state.contacts) {
-      const serializedState = JSON.stringify(this.state.contacts);
-      localStorage.setItem(CONTACTS_STORAGE_KEY, serializedState);
+      try {
+        const serializedState = JSON.stringify(this.state.contacts);
+        localStorage.setItem(CONTACTS_STORAGE_KEY, serializedState);
+      } catch (error) {
+        console.error(error.message);
+      }
     }
   }
 
@@ -54,11 +62,10 @@ export class App extends Component {
     }));
   };
 
-  deleteContact = id => {
-    const { contacts } = this.state;
-    const foundIndex = contacts.findIndex(contact => contact.id === id);
-    contacts.splice(foundIndex, 1);
-    this.setState({ contacts: contacts });
+  deleteContact = contactId => {
+    this.setState(prevState => ({
+      contacts: prevState.contacts.filter(contact => contact.id !== contactId),
+    }));
   };
 
   changeFilter = e => {
